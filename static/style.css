@@ -235,6 +235,21 @@ body[data-theme="dark"] .card-jogo {
     overflow-y: auto;
 }
 
+/* Blocos JSON da comparação */
+#comp1-json, #comp2-json {
+    font-size: 0.75rem;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] #comp1-json,
+[data-theme="dark"] #comp2-json {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
 /* Ícone de Favorito (Estrela) */
 .fav-btn {
     cursor: pointer;

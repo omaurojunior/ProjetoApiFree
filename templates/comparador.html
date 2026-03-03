@@ -121,6 +121,7 @@
                                 <small class="text-muted" id="comp1-info"></small>
                             </div>
                         </div>
+                        <pre id="comp1-json" class="bg-light p-2" style="max-height:300px;overflow:auto;"></pre>
                     </div>
                     
                     <div class="col-md-6">
@@ -131,15 +132,7 @@
                                 <small class="text-muted" id="comp2-info"></small>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="alert alert-info border-0 mt-3">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <span id="comp-messagem"></span>
-                </div>
-            </div>
-        </div>
+                        <pre id="comp2-json" class="bg-light p-2" style="max-height:300px;overflow:auto;"></pre>
     </div>
 </div>
 
@@ -166,8 +159,11 @@
 </style>
 
 <script>
-let time1Data = null;
-let time2Data = null;
+// encapsular tudo para aguardar DOM e utilitários
+// as variáveis serão declaradas dentro do listener
+document.addEventListener('DOMContentLoaded', () => {
+    let time1Data = null;
+    let time2Data = null;
 
 function mostrarSkeleton(prefixo) {
     document.getElementById(`${prefixo}-skeleton`).classList.remove('d-none');
@@ -222,6 +218,9 @@ function setTeamData(prefixo, t) {
     if (prefixo === 'time1') time1Data = t;
     else time2Data = t;
 
+    // preencher input com o nome caso tivesse sido buscado por ID
+    document.getElementById(`${prefixo}-input`).value = t.name || '';
+
     document.getElementById(`${prefixo}-escudo`).src = t.crest || '';
     document.getElementById(`${prefixo}-nome`).textContent = t.name;
     document.getElementById(`${prefixo}-fundacao`).textContent = t.founded || '—';
@@ -250,7 +249,7 @@ function buscarTime(prefixo) {
         return;
     }
     // chamar API de pesquisa
-    Utils.showSkeleton(`#${prefixo}-info`);
+    mostrarSkeleton(prefixo);
     fetch(`/api/teams?q=${encodeURIComponent(query)}`)
         .then(r => r.json())
         .then(list => {
@@ -321,12 +320,25 @@ function showComparisonResult(data) {
     const t2 = data.time2;
     document.getElementById('comp1-escudo').src = t1.escudo || '';
     document.getElementById('comp1-nome').textContent = t1.nome;
+    const extra1 = [];
+    if (t1.venue) extra1.push(`Estádio: ${t1.venue}`);
+    if (t1.phone) extra1.push(`Tel: ${t1.phone}`);
+    if (t1.email) extra1.push(`Email: ${t1.email}`);
+    if (t1.website) extra1.push(`Site: ${t1.website}`);
     document.getElementById('comp1-info').textContent =
-        `Fundado: ${t1.fundacao || '—'} • ${t1.jogadores} jogadores`;
+        `Fundado: ${t1.fundacao || '—'} • ${t1.jogadores} jogadores` +
+        (extra1.length ? ' • ' + extra1.join(' • ') : '');
+
     document.getElementById('comp2-escudo').src = t2.escudo || '';
     document.getElementById('comp2-nome').textContent = t2.nome;
+    const extra2 = [];
+    if (t2.venue) extra2.push(`Estádio: ${t2.venue}`);
+    if (t2.phone) extra2.push(`Tel: ${t2.phone}`);
+    if (t2.email) extra2.push(`Email: ${t2.email}`);
+    if (t2.website) extra2.push(`Site: ${t2.website}`);
     document.getElementById('comp2-info').textContent =
-        `Fundado: ${t2.fundacao || '—'} • ${t2.jogadores} jogadores`;
+        `Fundado: ${t2.fundacao || '—'} • ${t2.jogadores} jogadores` +
+        (extra2.length ? ' • ' + extra2.join(' • ') : '');
 
     // destaque de superioridade simples
     const comp1Elem = document.getElementById('comp-time1');
@@ -345,6 +357,10 @@ function showComparisonResult(data) {
     document.getElementById('comp-messagem').textContent =
         `Comparação gerada em ${new Date().toLocaleString()}`;
 
+    // preencher JSON bruto
+    document.getElementById('comp1-json').textContent = JSON.stringify(t1, null, 2);
+    document.getElementById('comp2-json').textContent = JSON.stringify(t2, null, 2);
+
     // efeito flip rápido
     document.getElementById('comp-time1').classList.add('flip-card');
     document.getElementById('comp-time2').classList.add('flip-card');
@@ -357,5 +373,12 @@ function clearTeam(prefixo) {
     document.getElementById(`${prefixo}-info`).classList.add('d-none');
     document.getElementById('comparacao-resultado').classList.add('d-none');
 }
+
+    // expor funções necessárias para botões inline
+    window.buscarTime1 = buscarTime1;
+    window.buscarTime2 = buscarTime2;
+    window.compararTimes = compararTimes;
+    window.clearTeam = clearTeam;
+});
 </script>
 {% endblock %}

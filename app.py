@@ -58,6 +58,53 @@ HEADERS = {'X-Auth-Token': API_KEY} if API_KEY else {}
 
 SUPPORTED_LEAGUES = {'BSA': 'Série A'}
 
+# ===== DADOS MANUAIS =====
+# Caso a API externa falhe ou para ter informação completa, podemos
+# fornecer um dicionário básico dos 20 clubes da Série A. Os dados são
+# fictícios/incompletos e servem como fallback.
+MANUAL_TEAMS = {
+    1: {'id':1,'name':'Flamengo','shortName':'Flamengo','tla':'FLA','crest':'','venue':'Maracanã','founded':1895,'squad':[],
+        'phone':'(21) 1234-5678','email':'contato@flamengo.com','address':'Rio de Janeiro, RJ','website':'https://www.flamengo.com.br'},
+    2: {'id':2,'name':'Palmeiras','shortName':'Palmeiras','tla':'PAL','crest':'','venue':'Allianz Parque','founded':1914,'squad':[],
+        'phone':'(11) 2345-6789','email':'contato@palmeiras.com','address':'São Paulo, SP','website':'https://www.palmeiras.com.br'},
+    3: {'id':3,'name':'São Paulo','shortName':'São Paulo','tla':'SPF','crest':'','venue':'Morumbi','founded':1930,'squad':[],
+        'phone':'(11) 3456-7890','email':'contato@sampetro.com','address':'São Paulo, SP','website':'https://www.saopaulofc.net'},
+    4: {'id':4,'name':'Corinthians','shortName':'Corinthians','tla':'COR','crest':'','venue':'Neo Química Arena','founded':1910,'squad':[],
+        'phone':'(11) 4567-8901','email':'contato@corinthians.com','address':'São Paulo, SP','website':'https://www.corinthians.com.br'},
+    5: {'id':5,'name':'Grêmio','shortName':'Grêmio','tla':'GRE','crest':'','venue':'Arena do Grêmio','founded':1903,'squad':[],
+        'phone':'(51) 5678-9012','email':'contato@gremio.net','address':'Porto Alegre, RS','website':'https://www.gremio.net'},
+    6: {'id':6,'name':'Internacional','shortName':'Inter','tla':'INT','crest':'','venue':'Beira-Rio','founded':1909,'squad':[],
+        'phone':'(51) 6789-0123','email':'contato@internacional.com','address':'Porto Alegre, RS','website':'https://www.internacional.com.br'},
+    7: {'id':7,'name':'Fluminense','shortName':'Fluminense','tla':'FLU','crest':'','venue':'Maracanã','founded':1902,'squad':[],
+        'phone':'(21) 7890-1234','email':'contato@fluminense.com','address':'Rio de Janeiro, RJ','website':'https://www.fluminense.com.br'},
+    8: {'id':8,'name':'Vasco da Gama','shortName':'Vasco','tla':'VAS','crest':'','venue':'São Januário','founded':1898,'squad':[],
+        'phone':'(21) 8901-2345','email':'contato@vasco.com.br','address':'Rio de Janeiro, RJ','website':'https://www.vasco.com.br'},
+    9: {'id':9,'name':'Cruzeiro','shortName':'Cruzeiro','tla':'CRU','crest':'','venue':'Mineirão','founded':1921,'squad':[],
+        'phone':'(31) 9012-3456','email':'contato@cruzeiro.com.br','address':'Belo Horizonte, MG','website':'https://www.cruzeiro.com.br'},
+    10: {'id':10,'name':'Atlético Mineiro','shortName':'Atlético MG','tla':'CAM','crest':'','venue':'Mineirão','founded':1908,'squad':[],
+        'phone':'(31) 0123-4567','email':'contato@atleticomg.com.br','address':'Belo Horizonte, MG','website':'https://www.atletico.com.br'},
+    11: {'id':11,'name':'Athletico Paranaense','shortName':'Athletico PR','tla':'CAP','crest':'','venue':'Arena da Baixada','founded':1924,'squad':[],
+        'phone':'(41) 1234-5678','email':'contato@athletico.com.br','address':'Curitiba, PR','website':'https://www.athletico.com.br'},
+    12: {'id':12,'name':'Coritiba','shortName':'Coritiba','tla':'CFC','crest':'','venue':'Couto Pereira','founded':1909,'squad':[],
+        'phone':'(41) 2345-6789','email':'contato@coritiba.com.br','address':'Curitiba, PR','website':'https://www.coritiba.com.br'},
+    13: {'id':13,'name':'Santos','shortName':'Santos','tla':'SAN','crest':'','venue':'Vila Belmiro','founded':1912,'squad':[],
+        'phone':'(13) 3456-7890','email':'contato@santosfc.com.br','address':'Santos, SP','website':'https://www.santosfc.com.br'},
+    14: {'id':14,'name':'Ponte Preta','shortName':'Ponte Preta','tla':'PON','crest':'','venue':'Moisés Lucarelli','founded':1900,'squad':[],
+        'phone':'(19) 4567-8901','email':'contato@pontepreta.com.br','address':'Campinas, SP','website':'https://www.pontepreta.com.br'},
+    15: {'id':15,'name':'Guarani','shortName':'Guarani','tla':'GUA','crest':'','venue':'Brinco de Ouro','founded':1911,'squad':[],
+        'phone':'(19) 5678-9012','email':'contato@guarani.com.br','address':'Campinas, SP','website':'https://www.guaranifc.com.br'},
+    16: {'id':16,'name':'Bahia','shortName':'Bahia','tla':'BHA','crest':'','venue':'Fonte Nova','founded':1931,'squad':[],
+        'phone':'(71) 6789-0123','email':'contato@ecbahia.com.br','address':'Salvador, BA','website':'https://www.esporteclubebahia.com.br'},
+    17: {'id':17,'name':'Vitória','shortName':'Vitória','tla':'VIT','crest':'','venue':'Barradão','founded':1902,'squad':[],
+        'phone':'(71) 7890-1234','email':'contato@ecvitoria.com.br','address':'Salvador, BA','website':'https://www.ecvitoria.com.br'},
+    18: {'id':18,'name':'Internacional (SP)','shortName':'Inter SP','tla':'INT','crest':'','venue':'Moisés Lucarelli','founded':1928,'squad':[],
+        'phone':'(11) 8901-2345','email':'contato@intersp.com.br','address':'São Paulo, SP','website':'https://www.intersp.com.br'},
+    19: {'id':19,'name':'Náutico','shortName':'Náutico','tla':'NAU','crest':'','venue':'Ilha do Retiro','founded':1901,'squad':[],
+        'phone':'(81) 9012-3456','email':'contato@nautico.com.br','address':'Recife, PE','website':'https://www.nautico-pe.com.br'},
+    20: {'id':20,'name':'Sport','shortName':'Sport','tla':'SPT','crest':'','venue':'Ilha do Retiro','founded':1905,'squad':[],
+        'phone':'(81) 0123-4567','email':'contato@sportrecife.com.br','address':'Recife, PE','website':'https://www.sportrecife.com.br'}
+}
+
 # ===== DECORATORS =====
 def validate_league(f):
     """Valida se a liga é suportada."""
@@ -347,9 +394,19 @@ def api_teams():
     """
     q = request.args.get('q', '').strip().lower()
     if not q:
-        return jsonify([])
+        # sem termo, devolver todos os manuais (poucos) e possivelmente dados da API
+        results = []
+        for t in MANUAL_TEAMS.values():
+            results.append({
+                'id': t['id'],
+                'name': t['name'],
+                'shortName': t.get('shortName'),
+                'crest': t.get('crest','')
+            })
+        return jsonify(results)
 
     results = []
+    # primeiro, buscar na API externa
     for lid in SUPPORTED_LEAGUES.keys():
         data = get_api_data(f"competitions/{lid}/teams")
         if data and 'teams' in data:
@@ -363,6 +420,15 @@ def api_teams():
                         'shortName': t.get('shortName'),
                         'crest': t.get('crest'),
                     })
+    # adicionar matches do manual se não houver match API
+    for tid, t in MANUAL_TEAMS.items():
+        if q in t.get('name','').lower() or q in t.get('shortName','').lower():
+            results.append({
+                'id': t['id'],
+                'name': t['name'],
+                'shortName': t.get('shortName'),
+                'crest': t.get('crest','')
+            })
     # remover duplicatas por id
     seen = set()
     unique = []
@@ -377,9 +443,13 @@ def api_teams():
 @cache.cached(timeout=3600)
 @handle_api_error
 def api_team(team_id):
-    """Retorna os dados brutos de um time em JSON."""
+    """Retorna os dados brutos de um time em JSON. Usa fallback manual se API falhar."""
     data = get_api_data(f"teams/{team_id}")
     if not data:
+        # verificar fallback manual
+        manual = MANUAL_TEAMS.get(team_id)
+        if manual:
+            return jsonify(manual)
         return jsonify({'erro': 'Time não encontrado'}), 404
     return jsonify(data)
 
