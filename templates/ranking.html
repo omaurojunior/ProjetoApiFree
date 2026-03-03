@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="display-5 fw-bold">{{ titulo }}</h1>
+        <div class="btn-group" role="group">
+            <a href="/ranking/pontos" class="btn btn-outline-success {% if tipo == 'pontos' %}active{% endif %}">📊 Pontos</a>
+            <a href="/ranking/gols" class="btn btn-outline-success {% if tipo == 'gols' %}active{% endif %}">🎯 Gols</a>
+            <a href="/ranking/defesa" class="btn btn-outline-success {% if tipo == 'defesa' %}active{% endif %}">🛡️ Defesa</a>
+        </div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="card shadow-sm border-0 mb-4 animate-card">
+        <div class="card-body">
+            <canvas id="rankingChart" style="max-height: 300px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card shadow-sm border-0 animate-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Pos</th>
+                        <th>Clube</th>
+                        {% if tipo == 'gols' %}
+                            <th class="text-center">🎯 Gols</th>
+                            <th class="text-center">Média</th>
+                        {% elif tipo == 'defesa' %}
+                            <th class="text-center">⚠️ Sofridos</th>
+                            <th class="text-center">Média</th>
+                        {% else %}
+                            <th class="text-center">P</th>
+                            <th class="text-center">J</th>
+                            <th class="text-center">V</th>
+                            <th class="text-center">E</th>
+                            <th class="text-center">D</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time in standings %}
+                    <tr class="fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                        <td class="ps-4 fw-bold">
+                            {% if time.position <= 4 %}
+                                <span class="badge bg-success">{{ time.position }}º</span>
+                            {% elif time.position <= 6 %}
+                                <span class="badge bg-primary">{{ time.position }}º</span>
+                            {% elif time.position >= 17 %}
+                                <span class="badge bg-danger">{{ time.position }}º</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ time.position }}º</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ time.team.crest }}" height="30" class="me-2">
+                                <span class="fw-bold text-truncate">{{ time.team.shortName }}</span>
+                            </div>
+                        </td>
+                        {% if tipo == 'gols' %}
+                            <td class="text-center fw-bold text-success" style="font-size: 1.1rem;">
+                                {{ time.goalsFor }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark">
+                                    {{ (time.goalsFor / time.playedGames)|round(2, 'floor') }}
+                                </span>
+                            </td>
+                        {% elif tipo == 'defesa' %}
+                            <td class="text-center fw-bold text-danger" style="font-size: 1.1rem;">
+                                {{ time.goalsAgainst }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark">
+                                    {{ (time.goalsAgainst / time.playedGames)|round(2, 'floor') }}
+                                </span>
+                            </td>
+                        {% else %}
+                            <td class="text-center fw-bold" style="font-size: 1.2rem; color: #fedd00;">
+                                {{ time.points }}
+                            </td>
+                            <td class="text-center">{{ time.playedGames }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-success">{{ time.won }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-warning text-dark">{{ time.draw }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger">{{ time.lost }}</span>
+                            </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Legenda -->
+    {% if tipo == 'pontos' %}
+    <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center">
+        <div class="legenda-item"><span class="dot" style="background: var(--libertadores)"></span> Libertadores</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--pre-liberta)"></span> Pré-Liberta</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--sul-americana)"></span> Sul-Americana</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--rebaixamento)"></span> Rebaixamento</div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .dot {
+        height: 12px;
+        width: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: white;
+        border-radius: 50px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dados = {{ standings|tojson }};
+    const tipo = "{{ tipo }}";
+    
+    if (!dados || dados.length === 0) {
+        document.getElementById('rankingChart').parentElement.innerHTML = 
+            '<div class="alert alert-info">Nenhum dado disponível</div>';
+        return;
+    }
+
+    const ctx = document.getElementById('rankingChart').getContext('2d');
+    let labels = dados.map(t => t.team.shortName || t.team.name);
+    let chartData = [];
+    let colors = [];
+    
+    if (tipo === 'gols') {
+        chartData = dados.map(t => t.goalsFor);
+        colors = dados.map((_, i) => {
+            const hue = (i * 30) % 360;
+            return `hsl(${hue}, 70%, 60%)`;
+        });
+    } else if (tipo === 'defesa') {
+        chartData = dados.map(t => t.goalsAgainst);
+        colors = dados.map((_, i) => {
+            const hue = (i * 30) % 360;
+            return `hsl(${hue}, 70%, 60%)`;
+        });
+    } else {
+        chartData = dados.map(t => t.points);
+        colors = dados.map(t => {
+            if (t.position <= 4) return '#198754';
+            if (t.position <= 6) return '#0d6efd';
+            if (t.position >= 17) return '#dc3545';
+            return '#6c757d';
+        });
+    }
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: tipo === 'gols' ? 'Gols' : (tipo === 'defesa' ? 'Gols Sofrid os' : 'Pontos'),
+                data: chartData,
+                backgroundColor: colors,
+                borderRadius: 5,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    beginAtZero: true,
+                    grid: { display: false }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

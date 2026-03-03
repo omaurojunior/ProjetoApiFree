@@ -42,6 +42,16 @@ body {
     display: inline-block;
 }
 
+/* Animação Pulsante para Partidas AO VIVO */
+@keyframes pulse-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.pulse-animation {
+    animation: pulse-badge 1.5s ease-in-out infinite !important;
+}
+
 .text-dark-custom { color: #212529 !important; }
 /* Suavizar cores das zonas na tabela */
 .table-success { --bs-table-bg: #d1e7dd80; }
@@ -389,3 +399,334 @@ body[data-theme="dark"] .card-jogo {
 /* Se quiser pintar o fundo suavemente ao passar o mouse */
 .table-hover tbody tr.row-libertadores:hover { background-color: rgba(25, 135, 84, 0.1); }
 .table-hover tbody tr.row-z4:hover { background-color: rgba(220, 53, 69, 0.1); }
+
+/* ===== NOVAS ANIMAÇÕES & EFEITOS ===== */
+
+/* Animação de Entrada Suave */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+/* Skeleton Loader - Animação de Carregamento */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.placeholder-glow .placeholder {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Efeito Glassmorphism */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Toast Notification */
+.toast {
+    border-radius: 10px;
+    min-width: 250px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Efeito Ripple no Clique */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    animation: ripple-animation 0.6s ease-out;
+}
+
+@keyframes ripple-animation {
+    to {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+    }
+}
+
+/* Card de Comparação - Animação de Flip */
+@keyframes flip {
+    0% { transform: rotateY(0); }
+    100% { transform: rotateY(360deg); }
+}
+
+.flip-card:hover {
+    animation: flip 0.6s ease-in-out;
+}
+
+/* Animação de Numeração (Loading para numbers) */
+@keyframes countup {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Efeito Scale ao Hover */
+.scale-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.scale-hover:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Badge Animado */
+.badge-pulse {
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+}
+
+/* Linha Animada de Progresso */
+.progress-animated .progress-bar {
+    animation: progress-animation 1.5s ease-in-out;
+}
+
+@keyframes progress-animation {
+    0% { width: 0; }
+}
+
+/* Spinner Customizado */
+.spinner-custom {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 151, 57, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--br-verde);
+    animation: spinner-rotation 1s linear infinite;
+}
+
+@keyframes spinner-rotation {
+    to { transform: rotate(360deg); }
+}
+
+/* Efeito Bounce */
+.bounce {
+    animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Efeito Glow para Cards Importantes */
+.glow-effect {
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(0, 151, 57, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 151, 57, 0.6);
+    }
+}
+
+/* Linha Animada de Separação */
+.line-animation {
+    position: relative;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--br-verde), transparent);
+    animation: line-slide 3s ease-in-out infinite;
+}
+
+@keyframes line-slide {
+    0% { 
+        background-position: -1000px;
+    }
+    50% {
+        background-position: 1000px;
+    }
+    100% {
+        background-position: -1000px;
+    }
+}
+
+/* Transição Suave entre Temas */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+button, a {
+    transition: all 0.3s ease;
+}
+
+/* Efeito Hover em Links */
+a:not(.btn):not(.nav-link) {
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+}
+
+a:not(.btn):not(.nav-link)::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--br-verde);
+    transition: width 0.3s ease;
+}
+
+a:not(.btn):not(.nav-link):hover::after {
+    width: 100%;
+}
+
+/* Botão com Efeito de Onda */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Dark Mode - Ajustes Adicionais */
+[data-theme="dark"] .animate-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+[data-theme="dark"] .glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .placeholder-glow .placeholder {
+    background: linear-gradient(90deg, #333333 25%, #444444 50%, #333333 75%);
+}
+
+/* Efeito de Página em Carregamento */
+.page-loading::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--br-verde), var(--br-amarelo), var(--br-verde));
+    animation: page-loading 1.5s ease-in-out infinite;
+    z-index: 9999;
+}
+
+@keyframes page-loading {
+    0% { width: 0; }
+    100% { width: 100%; }
+}
+
+/* Efeito Parallax Simples */
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Hover Effect para Tabelas */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 151, 57, 0.05);
+    transform: scale(1.01);
+}
+
+/* Animação de Dropdown */
+.dropdown-menu {
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Lazy Load Image Effect */
+img[loading="lazy"] {
+    opacity: 0;
+    animation: fadeImageIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeImageIn {
+    to {
+        opacity: 1;
+    }
+}

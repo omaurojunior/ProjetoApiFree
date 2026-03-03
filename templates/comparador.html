@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-6 fw-bold mb-3">⚔️ Comparador de Times</h1>
+        <p class="text-muted">Compare estatísticas de dois times lado a lado</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-5 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">🏠 Time 1</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="time1-input" placeholder="Digite ID ou nome do time...">
+                        <button class="btn btn-success" onclick="buscarTime1()">Buscar</button>
+                    </div>
+                    
+                    <div id="time1-info" class="d-none">
+                        <div class="text-center mb-3">
+                            <img id="time1-escudo" src="" style="max-height: 100px;" class="mb-3">
+                            <h5 id="time1-nome" class="fw-bold"></h5>
+                        </div>
+                        
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>📅 Fundação</span>
+                                <span id="time1-fundacao" class="fw-bold"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>🏟️ Estádio</span>
+                                <span id="time1-estadio" class="fw-bold"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>👥 Jogadores</span>
+                                <span id="time1-jogadores" class="badge bg-primary"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="time1-skeleton" class="d-none">
+                        <div class="placeholder-glow">
+                            <div class="placeholder col-12 mb-2" style="height: 100px;"></div>
+                            <div class="placeholder col-12 mb-2"></div>
+                            <div class="placeholder col-12 mb-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 d-flex align-items-center justify-content-center mb-4">
+            <button class="btn btn-light btn-lg" onclick="compararTimes()" style="width: 80px; height: 80px;" title="Comparar">
+                <span style="font-size: 2rem;">⚔️</span>
+            </button>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">🏠 Time 2</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="time2-input" placeholder="Digite ID ou nome do time...">
+                        <button class="btn btn-success" onclick="buscarTime2()">Buscar</button>
+                    </div>
+                    
+                    <div id="time2-info" class="d-none">
+                        <div class="text-center mb-3">
+                            <img id="time2-escudo" src="" style="max-height: 100px;" class="mb-3">
+                            <h5 id="time2-nome" class="fw-bold"></h5>
+                        </div>
+                        
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>📅 Fundação</span>
+                                <span id="time2-fundacao" class="fw-bold"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>🏟️ Estádio</span>
+                                <span id="time2-estadio" class="fw-bold"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>👥 Jogadores</span>
+                                <span id="time2-jogadores" class="badge bg-primary"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="time2-skeleton" class="d-none">
+                        <div class="placeholder-glow">
+                            <div class="placeholder col-12 mb-2" style="height: 100px;"></div>
+                            <div class="placeholder col-12 mb-2"></div>
+                            <div class="placeholder col-12 mb-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado da Comparação -->
+    <div id="comparacao-resultado" class="d-none">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-body">
+                <h4 class="card-title fw-bold mb-4">📊 Resultado da Comparação</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="comp-time1" class="card card-jogo mb-3">
+                            <div class="card-body text-center">
+                                <img id="comp1-escudo" src="" style="max-height: 80px;" class="mb-2">
+                                <h5 id="comp1-nome" class="fw-bold"></h5>
+                                <small class="text-muted" id="comp1-info"></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div id="comp-time2" class="card card-jogo mb-3">
+                            <div class="card-body text-center">
+                                <img id="comp2-escudo" src="" style="max-height: 80px;" class="mb-2">
+                                <h5 id="comp2-nome" class="fw-bold"></h5>
+                                <small class="text-muted" id="comp2-info"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0 mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span id="comp-messagem"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .placeholder-glow .placeholder {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+
+<script>
+let time1Data = null;
+let time2Data = null;
+
+function mostrarSkeleton(prefixo) {
+    document.getElementById(`${prefixo}-skeleton`).classList.remove('d-none');
+    document.getElementById(`${prefixo}-info`).classList.add('d-none');
+}
+
+function ocultarSkeleton(prefixo) {
+    document.getElementById(`${prefixo}-skeleton`).classList.add('d-none');
+    document.getElementById(`${prefixo}-info`).classList.remove('d-none');
+}
+
+function buscarTime1() {
+    buscarTime('time1');
+}
+
+function buscarTime2() {
+    buscarTime('time2');
+}
+
+function buscarTime(prefixo) {
+    const input = document.getElementById(`${prefixo}-input`);
+    const query = input.value.trim();
+    
+    if (!query) {
+        showNotification('Digite um ID ou nome do time', 'warning');
+        return;
+    }
+
+    mostrarSkeleton(prefixo);
+    
+    // Simular busca (em produção, chamar API real)
+    setTimeout(() => {
+        fetch(`/pesquisa`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `nome_time=${encodeURIComponent(query)}`
+        })
+        .then(r => r.text())
+        .then(html => {
+            // Extrair primeiro resultado
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const card = doc.querySelector('[onclick*="time"]');
+            
+            if (card) {
+                const nome = card.querySelector('h4').textContent;
+                const escudo = card.querySelector('img').src;
+                // Em produção buscar dados reais da API
+                showNotification('Time não encontrado. Use a página de Pesquisa para encontrar times.', 'info');
+            } else {
+                showNotification('Time não encontrado', 'warning');
+            }
+            ocultarSkeleton(prefixo);
+        })
+        .catch(e => {
+            console.error(e);
+            ocultarSkeleton(prefixo);
+        });
+    }, 800);
+}
+
+function compararTimes() {
+    if (!time1Data || !time2Data) {
+        showNotification('Selecione dois times para comparar', 'warning');
+        return;
+    }
+
+    // Aqui teríamos a lógica de comparação
+    showNotification('Comparação iniciada!', 'success');
+}
+
+function showNotification(mensagem, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.classList.add('toast', 'show', `bg-${tipo}`);
+    toast.innerHTML = `
+        <div class="toast-body text-white">
+            ${mensagem}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    
+    setTimeout(() => toast.remove(), 3000);
+}
+</script>
+{% endblock %}

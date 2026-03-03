@@ -7,10 +7,16 @@
         
         <form method="POST" class="mt-4">
             <div class="input-group input-group-lg shadow-sm">
-                <input type="text" name="nome_time" class="form-control border-0" placeholder="Digite o nome do clube..." value="{{ query }}">
+                <input type="text" name="nome_time" class="form-control border-0" placeholder="Digite o nome do clube..." value="{{ query }}" minlength="2" maxlength="50">
                 <button class="btn btn-success px-4" type="submit">Buscar</button>
             </div>
         </form>
+
+        <!-- Histórico de Pesquisas -->
+        <div class="mt-4" id="historico-container" style="display: none;">
+            <p class="text-muted small mb-2">📋 Pesquisas Recentes:</p>
+            <div id="historico-tags" class="d-flex flex-wrap gap-2 justify-content-center"></div>
+        </div>
     </div>
 </div>
 
@@ -36,9 +42,44 @@
     {% else %}
         {% if query %}
         <div class="text-center mt-5">
-            <p class="text-muted">Nenhum time encontrado para "{{ query }}".</p>
+            <p class="text-muted">ℹ️ Nenhum time encontrado para "{{ query }}".</p>
         </div>
         {% endif %}
     {% endfor %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const historicoForm = document.querySelector('form');
+    const historicoInput = document.querySelector('input[name="nome_time"]');
+    const historicoContainer = document.getElementById('historico-container');
+    const historicoTags = document.getElementById('historico-tags');
+
+    // Carregar histórico do localStorage
+    function exibirHistorico() {
+        let historico = JSON.parse(localStorage.getItem('historicoPesquisas') || '[]');
+        if (historico.length > 0) {
+            historicoContainer.style.display = 'block';
+            historicoTags.innerHTML = historico.map(termo => 
+                `<a href="?nome_time=${encodeURIComponent(termo)}" class="badge bg-secondary text-white text-decoration-none">
+                    ${termo}
+                </a>`
+            ).join('');
+        }
+    }
+
+    // Salvar pesquisa no histórico
+    historicoForm.addEventListener('submit', function() {
+        const termo = historicoInput.value.trim();
+        if (termo.length >= 2) {
+            let historico = JSON.parse(localStorage.getItem('historicoPesquisas') || '[]');
+            // Remove duplicadas e adiciona no topo
+            historico = [termo, ...historico.filter(t => t !== termo)].slice(0, 5);
+            localStorage.setItem('historicoPesquisas', JSON.stringify(historico));
+        }
+    });
+
+    exibirHistorico();
+});
+</script>
 {% endblock %}
