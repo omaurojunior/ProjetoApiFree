@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* Variáveis de Cores de Classificação */
+    :root {
+        --libertadores: #198754;    /* Verde G4 */
+        --pre-liberta: #0d6efd;     /* Azul G6 */
+        --sul-americana: #ffc107;   /* Amarelo Sula */
+        --rebaixamento: #dc3545;    /* Vermelho Z4 */
+    }
+
+    /* Indicadores laterais na tabela */
+    .pos-libertadores { border-left: 5px solid var(--libertadores) !important; font-weight: bold; }
+    .pos-pre { border-left: 5px solid var(--pre-liberta) !important; }
+    .pos-sula { border-left: 5px solid var(--sul-americana) !important; }
+    .pos-z4 { border-left: 5px solid var(--rebaixamento) !important; }
+
+    /* Estilo dos círculos de Forma (V/E/D) */
+    .form-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: white;
+        margin: 0 2px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-W { background-color: #28a745; }
+    .form-D { background-color: #ffc107; color: #212529; }
+    .form-L { background-color: #dc3545; }
+
+    /* Legenda Customizada */
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        padding: 5px 12px;
+        background: white;
+        border-radius: 50px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+</style>
+
+<div class="container animate-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">📊 Tabela de Classificação</h2>
+        <span class="badge bg-dark px-3 py-2">Série A 2026</span>
+    </div>
+
+    <div class="card mb-4 border-0 shadow-sm overflow-hidden">
+        <div class="card-body">
+            <canvas id="pointsChart" style="max-height: 200px;"></canvas>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Pos</th>
+                        <th>Clube</th>
+                        <th class="text-center">P</th>
+                        <th class="text-center">J</th>
+                        <th class="text-center">V</th>
+                        <th class="text-center">E</th>
+                        <th class="text-center">D</th>
+                        <th class="text-center">SG</th>
+                        <th class="text-center d-none d-md-table-cell">Últimos 5</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in standings %}
+                    {% set pos = row.position %}
+                    <tr>
+                        <td class="ps-4 {% if pos <= 4 %}pos-libertadores{% elif pos <= 6 %}pos-pre{% elif pos <= 12 %}pos-sula{% elif pos >= 17 %}pos-z4{% endif %}">
+                            {{ pos }}º
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ row.team.crest }}" width="30" class="me-3 img-fluid">
+                                <span class="fw-bold">{{ row.team.shortName }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center fw-bold text-primary">{{ row.points }}</td>
+                        <td class="text-center">{{ row.playedGames }}</td>
+                        <td class="text-center text-success">{{ row.won }}</td>
+                        <td class="text-center text-muted">{{ row.draw }}</td>
+                        <td class="text-center text-danger">{{ row.lost }}</td>
+                        <td class="text-center">{{ row.goalDifference }}</td>
+                        <td class="text-center d-none d-md-table-cell">
+                            <div class="d-flex justify-content-center">
+                                {% if row.form %}
+                                    {% for result in row.form.split(',') %}
+                                        <span class="form-circle form-{{ result }}">{{ result }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center">
+        <div class="legenda-item"><span class="dot" style="background: var(--libertadores)"></span> Libertadores</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--pre-liberta)"></span> Pré-Liberta</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--sul-americana)"></span> Sul-Americana</div>
+        <div class="legenda-item"><span class="dot" style="background: var(--rebaixamento)"></span> Rebaixamento</div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('pointsChart').getContext('2d');
+        
+        // Cores dinâmicas para o gráfico também!
+        const colors = [{% for row in standings %}'{{ "#198754" if row.position <= 4 else ("#0d6efd" if row.position <= 6 else ("#dc3545" if row.position >= 17 else "#6c757d")) }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for row in standings %}"{{ row.team.shortName }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Pontos',
+                    data: [{% for row in standings %}{{ row.points }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: colors,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

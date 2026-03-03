@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="loading-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(255,255,255,0.7); z-index: 9999;">
+    <div class="spinner-border text-success" role="status"></div>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border gap-3">
+    <a href="/?matchday={{ rodada_atual - 1 }}" class="btn btn-outline-success {% if rodada_atual <= 1 %}disabled{% endif %}">« Anterior</a>
+
+    <div class="dropdown">
+        <button class="btn btn-success dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
+            {{ rodada_atual }}ª RODADA
+        </button>
+        <ul class="dropdown-menu shadow" style="max-height: 300px; overflow-y: auto;">
+            {% for r in range(1, total_rodadas + 1) %}
+            <li><a class="dropdown-item {% if r == rodada_atual %}active{% endif %}" href="/?matchday={{ r }}">{{ r }}ª Rodada</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <a href="/?matchday={{ rodada_atual + 1 }}" class="btn btn-outline-success {% if rodada_atual >= total_rodadas %}disabled{% endif %}">Próxima »</a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 g-4" id="jogos-container">
+    {% for m in matches %}
+    <div class="col match-card-wrapper">
+        <div class="card card-jogo h-100 match-card" data-home-id="{{ m.homeTeam.id }}" data-away-id="{{ m.awayTeam.id }}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-center" style="width: 40%;">
+                        <span class="fav-btn" data-team-id="{{ m.homeTeam.id }}" onclick="toggleFavorito('{{ m.homeTeam.id }}', this)">⭐</span>
+                        <img src="{{ m.homeTeam.crest }}" height="50" class="d-block mx-auto mb-2">
+                        <span class="fw-bold small">{{ m.homeTeam.shortName }}</span>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="placar-badge">{{ m.score.fullTime.home if m.score.fullTime.home is not none else '-' }} : {{ m.score.fullTime.away if m.score.fullTime.away is not none else '-' }}</div>
+                        <div class="small text-muted mt-2">{{ m.utcDate|format_date }}</div>
+                    </div>
+
+                    <div class="text-center" style="width: 40%;">
+                        <span class="fav-btn" data-team-id="{{ m.awayTeam.id }}" onclick="toggleFavorito('{{ m.awayTeam.id }}', this)">⭐</span>
+                        <img src="{{ m.awayTeam.crest }}" height="50" class="d-block mx-auto mb-2">
+                        <span class="fw-bold small">{{ m.awayTeam.shortName }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('confronto_direto', match_id=m.id) }}" class="btn btn-sm btn-light">
+    📊 Histórico de confrontos
+</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarInterface();
+    organizarFavoritos();
+    
+    function organizarFavoritos() {
+        const favs = JSON.parse(localStorage.getItem('favTeams') || '[]');
+        const container = document.getElementById('jogos-container');
+        const cards = document.querySelectorAll('.match-card-wrapper');
+        
+        cards.forEach(wrapper => {
+            const card = wrapper.querySelector('.match-card');
+            const hId = card.getAttribute('data-home-id');
+            const aId = card.getAttribute('data-away-id');
+            
+            if (favs.includes(hId) || favs.includes(aId)) {
+                card.style.border = "2px solid #fedd00"; // Borda amarela para destaque
+                container.prepend(wrapper); // Move para o topo
+            }
+        });
+    }
+
+    window.toggleFavorito = function(teamId, element) {
+        let favs = JSON.parse(localStorage.getItem('favTeams') || '[]');
+        teamId = teamId.toString();
+        if (favs.includes(teamId)) {
+            favs = favs.filter(id => id !== teamId);
+            element.classList.remove('active');
+        } else {
+            favs.push(teamId);
+            element.classList.add('active');
+        }
+        localStorage.setItem('favTeams', JSON.stringify(favs));
+        location.reload(); // Recarrega para aplicar a ordem
+    };
+
+    function inicializarInterface() {
+        const favs = JSON.parse(localStorage.getItem('favTeams') || '[]');
+        document.querySelectorAll('.fav-btn').forEach(btn => {
+            if (favs.includes(btn.getAttribute('data-team-id'))) btn.classList.add('active');
+        });
+    }
+});
+</script>
+<style>
+    .dropdown-item:hover {
+        background-color: var(--br-verde);
+        color: white;
+        transition: 0.2s;
+    }
+    
+    .placar-badge {
+        transition: transform 0.3s;
+    }
+    
+    .card-jogo:hover .placar-badge {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUTMAX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">FUT<span class="text-warning">MAX</span></a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">⚽ Resultados</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ligas">📊 Classificação</a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/artilharia">🎯 Artilharia</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pesquisa">🔍 Pesquisar</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center">
+                    <button id="theme-toggle" class="btn btn-sm btn-outline-light">🌙 Modo Escuro</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Função para atualizar o texto do botão
+        const updateButtonText = (isDark) => {
+            themeToggle.innerText = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+        };
+
+        // Carregar tema salvo no localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            updateButtonText(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                updateButtonText(false);
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateButtonText(true);
+            }
+        });
+    </script>
+</body>
+</html>

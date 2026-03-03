@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-white p-4 rounded shadow-sm border">
+    <h2 class="fw-bold mb-4" style="color: var(--br-verde)">🎯 Artilharia - Série A</h2>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Pos</th>
+                    <th>Jogador</th>
+                    <th>Time</th>
+                    <th class="text-center">Gols</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in scorers %}
+                <tr>
+                    <td>{{ loop.index }}º</td>
+                    <td class="fw-bold">{{ s.player.name }}</td>
+                    <td><img src="{{ s.team.crest }}" width="25" class="me-2"> {{ s.team.shortName }}</td>
+                    <td class="text-center fw-bold text-success" style="font-size: 1.2rem;">{{ s.goals }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

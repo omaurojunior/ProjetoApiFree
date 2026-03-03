@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="row align-items-center bg-white p-5 rounded-4 shadow-sm mb-5 border-start border-5 border-success">
+        <div class="col-md-3 text-center">
+            <img src="{{ team.crest }}" width="180" class="img-fluid mb-3">
+        </div>
+        <div class="col-md-9">
+            <h1 class="display-4 fw-bold">{{ team.name }}</h1>
+            <div class="row mt-3">
+                <div class="col-sm-6">
+                    <p class="mb-1"><strong>🏟️ Estádio:</strong> {{ team.venue }}</p>
+                    <p class="mb-1"><strong>📅 Fundação:</strong> {{ team.founded }}</p>
+                    <p class="mb-1"><strong>🎨 Cores:</strong> {{ team.clubColors }}</p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="mb-1"><strong>🌐 Site:</strong> <a href="{{ team.website }}" target="_blank">{{ team.website }}</a></p>
+                    <p class="mb-1"><strong>📍 Endereço:</strong> {{ team.address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <h4 class="fw-bold mb-3">🏆 Competições Atuais</h4>
+            {% for c in comps %}
+            <div class="d-flex align-items-center p-3 bg-white mb-2 rounded shadow-sm border">
+                <img src="{{ c.emblem }}" width="40" class="me-3">
+                <div>
+                    <h6 class="mb-0 fw-bold">{{ c.name }}</h6>
+                    <small class="text-muted">{{ c.type }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-8">
+            <h4 class="fw-bold mb-3">🏃 Elenco Profissional</h4>
+            <div class="accordion shadow-sm" id="squadAccordion">
+                {% for pos, players in squad.items() %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                            {{ pos }} ({{ players|length }})
+                        </button>
+                    </h2>
+                    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#squadAccordion">
+                        <div class="accordion-body">
+                            <div class="list-group list-group-flush">
+                                {% for p in players %}
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>{{ p.name }}</span>
+                                    <span class="text-muted small">{{ p.nationality }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,391 @@
+:root {
+    --br-verde: #009739;
+    --br-amarelo: #fedd00;
+    --br-azul: #012169;
+    --bg-site: #f4f7f6;
+}
+:root {
+    --libertadores: #198754;    /* Verde G4 */
+    --pre-liberta: #0d6efd;     /* Azul G6 */
+    --sul-americana: #ffc107;   /* Amarelo Sul-Americana */
+    --rebaixamento: #dc3545;    /* Vermelho Z4 */
+    --intermediario: #6c757d;   /* Cinza Meio de Tabela */
+}
+body { 
+    background-color: var(--bg-site) !important; 
+    color: #333 !important; 
+    font-family: 'Segoe UI', sans-serif; 
+}
+
+/* Navbar */
+.navbar { 
+    background-color: var(--br-verde) !important;
+    border-bottom: 5px solid var(--br-amarelo) !important;
+}
+
+/* Cards de Jogos - Forçando fundo branco */
+.card-jogo {
+    background: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    color: #333 !important;
+}
+
+.placar-badge {
+    background: var(--br-azul) !important;
+    color: var(--br-amarelo) !important;
+    font-size: 1.6rem;
+    font-weight: 800;
+    padding: 8px 18px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.text-dark-custom { color: #212529 !important; }
+/* Suavizar cores das zonas na tabela */
+.table-success { --bs-table-bg: #d1e7dd80; }
+.table-info { --bs-table-bg: #cff4fc80; }
+.table-danger { --bs-table-bg: #f8d7da80; }
+
+/* Efeito de hover mais elegante */
+.table-hover tbody tr:hover {
+    filter: brightness(0.95);
+    transition: 0.2s;
+}
+
+/* Ajuste fino para imagens dos escudos */
+img {
+    object-fit: contain;
+}
+/* Estilo dos círculos de forma (V, E, D) */
+.badge-form {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+
+.badge-form.W { background-color: #28a745; } /* Vitória - Green */
+.badge-form.D { background-color: #ffc107; color: #212529; } /* Empate - Yellow */
+.badge-form.L { background-color: #dc3545; } /* Derrota - Red */
+
+/* Ajuste para telas mobile: esconder forma se ficar muito apertado */
+@media (max-width: 576px) {
+    .badge-form { width: 18px; height: 18px; font-size: 0.6rem; }
+}
+
+.card-body {
+    background-image: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+}
+/* Efeito de levitação nos cards */
+.card-jogo {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-jogo:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+}
+
+/* Skeleton Loader (Animação de carregamento) */
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+.card-jogo { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.card-jogo:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important; }
+canvas { max-width: 100%; height: auto !important; }
+
+.card-jogo {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Badge de "AO VIVO" pulsante */
+.bg-danger {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+/* Badge de AO VIVO pulsante */
+.bg-danger {
+    background-color: #dc3545 !important;
+    animation: pulse-live 1.5s infinite;
+    box-shadow: 0 0 0 rgba(220, 53, 69, 0.4);
+    border: none;
+}
+
+@keyframes pulse-live {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Glassmorphism leve nos cards para um visual moderno */
+.card-jogo {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+/* Efeito Glassmorphism nos cards */
+.card-jogo {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease;
+}
+
+.card-jogo:hover {
+    transform: translateY(-5px);
+}
+
+/* Badge de AO VIVO pulsante */
+.live-badge {
+    animation: pulse-red 1.5s infinite;
+    box-shadow: 0 0 0 rgba(220, 53, 69, 0.4);
+}
+
+@keyframes pulse-red {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+/* Exemplo de variáveis para Dark Mode no seu style.css */
+[data-theme="dark"] {
+    --bg-site: #121212;
+    --br-verde: #006425;
+    --text-color: #ffffff;
+}
+
+/* Variáveis de Cores para Modo Escuro */
+[data-theme="dark"] {
+    --bg-site: #121212 !important;
+    --text-main: #ffffff !important;
+    --card-bg: #1e1e1e !important;
+    --border-color: #333 !important;
+}
+
+body[data-theme="dark"] {
+    background-color: var(--bg-site) !important;
+    color: var(--text-main) !important;
+}
+
+body[data-theme="dark"] .card, 
+body[data-theme="dark"] .bg-white,
+body[data-theme="dark"] .card-jogo {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Ícone de Favorito (Estrela) */
+.fav-btn {
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+    color: #ccc;
+}
+.fav-btn.active { color: var(--br-amarelo); }
+.fav-btn:hover { transform: scale(1.2); }
+
+/* Animação de Alerta de Golo */
+.goal-alert {
+    animation: flash-goal 1s infinite alternate;
+}
+@keyframes flash-goal {
+    from { background-color: transparent; }
+    to { background-color: rgba(255, 193, 7, 0.3); }
+}
+/* Correção para tabelas no modo escuro */
+[data-theme="dark"] .table {
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+}
+
+[data-theme="dark"] .table-dark {
+    background-color: #000 !important;
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: #1e1e1e !important;
+}
+/* Correção global para textos em modo escuro */
+[data-theme="dark"] body, 
+[data-theme="dark"] .card-body, 
+[data-theme="dark"] .table,
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h4,
+[data-theme="dark"] td,
+[data-theme="dark"] .list-group-item {
+    color: #f8f9fa !important;
+}
+
+[data-theme="dark"] .accordion-button {
+    background-color: #2b2b2b !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .accordion-item {
+    background-color: #1e1e1e !important;
+    border-color: #444 !important;
+}
+
+/* Deixar os inputs de pesquisa visíveis no escuro */
+[data-theme="dark"] .form-control {
+    background-color: #2b2b2b !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+/* Animação de entrada para os cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.match-card-wrapper, .table-responsive, .card {
+    animation: fadeInUp 0.5s ease backwards;
+}
+
+/* Delay escalonado para os cards (opcional, via JS ou classes extras) */
+.match-card-wrapper:nth-child(2) { animation-delay: 0.1s; }
+.match-card-wrapper:nth-child(3) { animation-delay: 0.2s; }
+
+/* Estilização da Forma (Últimos 5 jogos) */
+.form-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    margin: 0 2px;
+    text-transform: uppercase;
+}
+
+.form-W { background-color: #28a745; } /* Vitória */
+.form-D { background-color: #ffc107; } /* Empate */
+.form-L { background-color: #dc3545; } /* Derrota */
+
+/* Substitua ou melhore sua classe .card-jogo */
+.card-jogo {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.card-jogo:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+    border-color: var(--br-amarelo) !important;
+}
+.btn-success {
+    background-color: var(--br-verde) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 5px 15px rgba(0, 151, 57, 0.4);
+}
+
+.btn-success:active {
+    transform: scale(0.95);
+}
+/* Melhore sua animação atual */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Aplique este atraso aos itens da lista de jogos */
+.match-card-wrapper:nth-child(1) { animation-delay: 0.1s; }
+.match-card-wrapper:nth-child(2) { animation-delay: 0.15s; }
+.match-card-wrapper:nth-child(3) { animation-delay: 0.2s; }
+.match-card-wrapper:nth-child(4) { animation-delay: 0.25s; }
+.match-card-wrapper:nth-child(5) { animation-delay: 0.3s; }
+[data-theme="dark"] {
+    --bg-site: #050a14; /* Azul quase preto */
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .card-jogo {
+    background: rgba(20, 30, 50, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+}
+.img-fluid, .team-logo {
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+.card-jogo:hover .img-fluid {
+    transform: rotate(5deg) scale(1.1);
+}
+/* Indicador lateral na posição */
+.pos-libertadores { border-left: 5px solid var(--libertadores); font-weight: bold; }
+.pos-pre { border-left: 5px solid var(--pre-liberta); }
+.pos-sula { border-left: 5px solid var(--sul-americana); }
+.pos-z4 { border-left: 5px solid var(--rebaixamento); }
+
+/* Se quiser pintar o fundo suavemente ao passar o mouse */
+.table-hover tbody tr.row-libertadores:hover { background-color: rgba(25, 135, 84, 0.1); }
+.table-hover tbody tr.row-z4:hover { background-color: rgba(220, 53, 69, 0.1); }

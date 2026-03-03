@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-5 fw-bold mb-3">Busque seu <span class="text-success">Time</span></h1>
+        <p class="text-muted">Encontre estatísticas, elencos e informações de clubes brasileiros.</p>
+        
+        <form method="POST" class="mt-4">
+            <div class="input-group input-group-lg shadow-sm">
+                <input type="text" name="nome_time" class="form-control border-0" placeholder="Digite o nome do clube..." value="{{ query }}">
+                <button class="btn btn-success px-4" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% for t in teams %}
+    <div class="col-md-4 mb-4">
+        <div class="card card-jogo h-100 border-0 shadow-sm text-center p-3">
+            <div class="py-3">
+                <img src="{{ t.crest }}" height="100" class="mb-3" alt="{{ t.name }}">
+                <h4 class="fw-bold">{{ t.name }}</h4>
+                <p class="text-muted small mb-3"><i class="bi bi-geo-alt"></i> {{ t.venue or 'Estádio não informado' }}</p>
+                
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <span class="badge bg-light text-dark border">ID: {{ t.id }}</span>
+                    <span class="badge bg-light text-dark border">{{ t.shortName }}</span>
+                </div>
+            </div>
+            <div class="mt-auto pt-3 border-top">
+                <a href="/time/{{ t.id }}" class="btn btn-outline-success w-100">Ver Perfil Completo</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {% if query %}
+        <div class="text-center mt-5">
+            <p class="text-muted">Nenhum time encontrado para "{{ query }}".</p>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
