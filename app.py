@@ -300,15 +300,39 @@ def detalhes_time(team_id):
         flash("❌ Time não encontrado", "danger")
         return redirect(url_for('pesquisa'))
     
+    squad_list = team.get('squad', [])
     squad = {
-        'Goleiros': [p for p in team.get('squad', []) if p.get('position') == 'Goalkeeper'],
-        'Defensores': [p for p in team.get('squad', []) if p.get('position') == 'Defence'],
-        'Meias': [p for p in team.get('squad', []) if p.get('position') == 'Midfield'],
-        'Atacantes': [p for p in team.get('squad', []) if p.get('position') == 'Offence'],
+        'Goleiros': [p for p in squad_list if p.get('position') == 'Goalkeeper'],
+        'Defensores': [p for p in squad_list if p.get('position') == 'Defence'],
+        'Meias': [p for p in squad_list if p.get('position') == 'Midfield'],
+        'Atacantes': [p for p in squad_list if p.get('position') == 'Offence'],
     }
 
+    # calcular estatísticas do elenco
+    today = datetime.utcnow().date()
+    ages = []
+    nationality_counts = {}
+    for p in squad_list:
+        dob = p.get('dateOfBirth')
+        nat = p.get('nationality')
+        if dob:
+            try:
+                d = datetime.strptime(dob, '%Y-%m-%d').date()
+                age = today.year - d.year - ((today.month, today.day) < (d.month, d.day))
+                ages.append(age)
+            except:
+                pass
+        if nat:
+            nationality_counts[nat] = nationality_counts.get(nat, 0) + 1
+    stats = {}
+    if ages:
+        stats['min_age'] = min(ages)
+        stats['max_age'] = max(ages)
+        stats['avg_age'] = sum(ages) // len(ages)
+    stats['nationalities'] = nationality_counts
+
     competitions = team.get('runningCompetitions', [])
-    return render_template('time.html', team=team, squad=squad, competitions=competitions)
+    return render_template('time.html', team=team, squad=squad, competitions=competitions, stats=stats)
 
 # ===== API REST ENDPOINTS =====
 @app.route('/api/favoritos', methods=['GET', 'POST', 'DELETE'])
@@ -454,6 +478,37 @@ def api_team(team_id):
     return jsonify(data)
 
 
+
+@app.route('/api/head2head', methods=['GET'])
+@cache.cached(timeout=600, query_string=True)
+@handle_api_error
+def api_head2head():
+    """Retorna últimos confrontos entre dois times.
+
+    Se não houver dados na API, retorna lista vazia. Filtra partidas
+    já finalizadas onde os dois times se enfrentaram.
+    """
+    t1 = request.args.get('team1', type=int)
+    t2 = request.args.get('team2', type=int)
+    if not t1 or not t2:
+        return jsonify([])
+    # buscar partidas do primeiro time e filtrar pelo segundo
+    data = get_api_data(f"teams/{t1}/matches?status=FINISHED&limit=20")
+    matches = []
+    if data and 'matches' in data:
+        for m in data['matches']:
+            home = m.get('homeTeam', {}).get('id')
+            away = m.get('awayTeam', {}).get('id')
+            if home == t2 or away == t2:
+                matches.append({
+                    'utcDate': m.get('utcDate'),
+                    'homeTeam': m.get('homeTeam', {}).get('name'),
+                    'awayTeam': m.get('awayTeam', {}).get('name'),
+                    'score': m.get('score', {}).get('fullTime')
+                })
+    return jsonify(matches)
+
+
 @app.route('/api/ranking', methods=['GET'])
 @cache.cached(timeout=1800)
 # @limiter.limit("50 per minute")
@@ -497,6 +552,14 @@ def api_ranking():
     except (IndexError, KeyError, TypeError) as e:
         logger.error(f"Erro ao processar ranking: {e}")
         return jsonify({'erro': 'Erro ao processar dados'}), 500
+
+@app.route('/favoritos')
+# @limiter.limit("30 per minute")
+@handle_api_error
+def favoritos():
+    """Página de favoritos (gerenciados via localStorage)."""
+    return render_template('favoritos.html')
+
 
 @app.route('/comparador')
 # @limiter.limit("30 per minute")

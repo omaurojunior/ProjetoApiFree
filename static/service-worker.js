@@ -1,9 +1,9 @@
 /**
  * Service Worker - FUTMAX PWA
- * Caching e offline support
+ * Caching e offline support com synchronization
  */
 
-const CACHE_NAME = 'futmax-v1';
+const CACHE_NAME = 'futmax-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/static/style.css',
@@ -12,7 +12,8 @@ const ASSETS_TO_CACHE = [
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap'
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap',
+    'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js'
 ];
 
 // Instalar Service Worker

@@ -136,28 +136,32 @@
     </div>
 </div>
 
-<style>
-    .card {
-        transition: all 0.3s ease;
-    }
+                <ul class="nav nav-tabs mt-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-content" type="button">📊 Comparação</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="charts-tab" data-bs-toggle="tab" data-bs-target="#charts-content" type="button">📊 Gráficos</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="h2h-tab" data-bs-toggle="tab" data-bs-target="#h2h-content" type="button">⚔️ Confrontos</button>
+                    </li>
+                </ul>
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .placeholder-glow .placeholder {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-    }
-
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-</style>
-
+                <div class="tab-content mt-3">
+                    <div id="stats-content" class="tab-pane fade show active">
+                        <div class="row" id="stats-row"></div>
+                    </div>
+                    <div id="charts-content" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-md-6"><canvas id="fundacao-chart"></canvas></div>
+                            <div class="col-md-6"><canvas id="jogadores-chart"></canvas></div>
+                        </div>
+                    </div>
+                    <div id="h2h-content" class="tab-pane fade">
+                        <div id="h2h-list"></div>
+                    </div>
+                </div>
 <script>
 // encapsular tudo para aguardar DOM e utilitários
 // as variáveis serão declaradas dentro do listener
@@ -361,9 +365,112 @@ function showComparisonResult(data) {
     document.getElementById('comp1-json').textContent = JSON.stringify(t1, null, 2);
     document.getElementById('comp2-json').textContent = JSON.stringify(t2, null, 2);
 
+    // gráficos
+    createComparisonCharts(t1, t2);
+    
+    // head-to-head
+    loadHeadToHead(t1.id, t2.id);
+
+    // Stats
+    const statsHtml = `
+        <div class="col-md-6">
+            <h5>${t1.nome}</h5>
+            <ul class="list-unstyled">
+                <li><strong>ID:</strong> ${t1.id}</li>
+                <li><strong>Fundação:</strong> ${t1.fundacao || '—'}</li>
+                <li><strong>Estádio:</strong> ${t1.estadio || '—'}</li>
+                <li><strong>Jogadores:</strong> ${t1.jogadores || 0}</li>
+                <li><strong>Telefone:</strong> ${t1.phone || '—'}</li>
+                <li><strong>Email:</strong> ${t1.email || '—'}</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h5>${t2.nome}</h5>
+            <ul class="list-unstyled">
+                <li><strong>ID:</strong> ${t2.id}</li>
+                <li><strong>Fundação:</strong> ${t2.fundacao || '—'}</li>
+                <li><strong>Estádio:</strong> ${t2.estadio || '—'}</li>
+                <li><strong>Jogadores:</strong> ${t2.jogadores || 0}</li>
+                <li><strong>Telefone:</strong> ${t2.phone || '—'}</li>
+                <li><strong>Email:</strong> ${t2.email || '—'}</li>
+            </ul>
+        </div>
+    `;
+    document.getElementById('stats-row').innerHTML = statsHtml;
+
     // efeito flip rápido
     document.getElementById('comp-time1').classList.add('flip-card');
     document.getElementById('comp-time2').classList.add('flip-card');
+}
+
+function createComparisonCharts(t1, t2) {
+    // Gráfico de Fundação
+    const fundacaoCtx = document.getElementById('fundacao-chart');
+    if (fundacaoCtx) {
+        new Chart(fundacaoCtx, {
+            type: 'bar',
+            data: {
+                labels: [t1.nome, t2.nome],
+                datasets: [{
+                    label: 'Ano de Fundação',
+                    data: [t1.fundacao || 0, t2.fundacao || 0],
+                    backgroundColor: ['#009739', '#fedd00'],
+                    borderColor: ['#012169', '#012169'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 2030 } }
+            }
+        });
+    }
+    
+    // Gráfico de Jogadores
+    const jogadoresCtx = document.getElementById('jogadores-chart');
+    if (jogadoresCtx) {
+        new Chart(jogadoresCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [t1.nome, t2.nome],
+                datasets: [{
+                    data: [t1.jogadores || 0, t2.jogadores || 0],
+                    backgroundColor: ['#009739', '#fedd00'],
+                    borderColor: '#012169',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+}
+
+function loadHeadToHead(id1, id2) {
+    fetch(`/api/head2head?team1=${id1}&team2=${id2}`)
+        .then(r => r.json())
+        .then(matches => {
+            const h2hList = document.getElementById('h2h-list');
+            if (!matches || matches.length === 0) {
+                h2hList.innerHTML = '<p class="text-muted text-center">Nenhum confronto encontrado</p>';
+                return;
+            }
+            let html = '<table class="table"><thead><tr><th>Data</th><th>Resultado</th></tr></thead><tbody>';
+            matches.forEach(m => {
+                const score = m.score || {};
+                const result = `${m.homeTeam} ${score.home || '?'} × ${score.away || '?'} ${m.awayTeam}`;
+                html += `<tr><td>${new Date(m.utcDate).toLocaleDateString('pt-BR')}</td><td>${result}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            h2hList.innerHTML = html;
+        })
+        .catch(e => {
+            console.error(e);
+            document.getElementById('h2h-list').innerHTML = '<p class="text-muted text-center">Erro ao carregar confrontos</p>';
+        });
 }
 
 function clearTeam(prefixo) {

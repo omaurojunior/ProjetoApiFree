@@ -16,6 +16,18 @@ body {
     color: #333 !important; 
     font-family: 'Segoe UI', sans-serif; 
     transition: background-color 0.3s, color 0.3s;
+    animation: pageEnter 0.4s ease-out;
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Navbar */
@@ -424,8 +436,16 @@ body[data-theme="dark"] .card-jogo {
 .table-hover tbody tr.row-libertadores:hover { background-color: rgba(25, 135, 84, 0.1); }
 .table-hover tbody tr.row-z4:hover { background-color: rgba(220, 53, 69, 0.1); }
 
-/* Modo dark suave */
-body[data-theme="dark"],
+/* Navegação suave entre páginas */
+a[href]:not([onclick]) {
+    position: relative;
+}
+
+/* Transição do dark mode */
+body[data-theme="dark"] {
+    background: linear-gradient(135deg, #050a14 0%, #0a1428 100%) !important;
+}
+
 body[data-theme="dark"] .card,
 body[data-theme="dark"] .navbar,
 body[data-theme="dark"] .form-control,
