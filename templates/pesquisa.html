@@ -5,10 +5,11 @@
         <h1 class="display-5 fw-bold mb-3">Busque seu <span class="text-success">Time</span></h1>
         <p class="text-muted">Encontre estatísticas, elencos e informações de clubes brasileiros.</p>
         
-        <form method="POST" class="mt-4">
-            <div class="input-group input-group-lg shadow-sm">
-                <input type="text" name="nome_time" class="form-control border-0" placeholder="Digite o nome do clube..." value="{{ query }}" minlength="2" maxlength="50">
+        <form method="POST" class="mt-4" id="pesquisa-form">
+            <div class="input-group input-group-lg shadow-sm position-relative">
+                <input type="text" name="nome_time" class="form-control border-0" placeholder="Digite o nome do clube..." value="{{ query }}" minlength="2" maxlength="50" id="pesquisa-input" autocomplete="off">
                 <button class="btn btn-success px-4" type="submit">Buscar</button>
+                <ul id="pesquisa-suggestions" class="list-group position-absolute w-100 mt-1 d-none" style="z-index:1000;"></ul>
             </div>
         </form>
 
@@ -23,7 +24,7 @@
 <div class="row">
     {% for t in teams %}
     <div class="col-md-4 mb-4">
-        <div class="card card-jogo h-100 border-0 shadow-sm text-center p-3">
+        <div class="card card-jogo h-100 border-0 shadow-sm text-center p-3 animate-card">
             <div class="py-3">
                 <img src="{{ t.crest }}" height="100" class="mb-3" alt="{{ t.name }}">
                 <h4 class="fw-bold">{{ t.name }}</h4>
@@ -80,6 +81,44 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     exibirHistorico();
+
+    // autocomplete via API
+    const inp = document.getElementById('pesquisa-input');
+    const sug = document.getElementById('pesquisa-suggestions');
+    inp.addEventListener('input', Utils.debounce(function(e) {
+        const val = e.target.value.trim();
+        if (!val) {
+            sug.classList.add('d-none');
+            return;
+        }
+        fetch(`/api/teams?q=${encodeURIComponent(val)}`)
+            .then(r => r.json())
+            .then(list => {
+                sug.innerHTML = '';
+                if (list.length === 0) {
+                    sug.classList.add('d-none');
+                    return;
+                }
+                list.forEach(t => {
+                    const item = document.createElement('li');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = t.name;
+                    item.onclick = () => {
+                        inp.value = t.name;
+                        sug.classList.add('d-none');
+                        document.getElementById('pesquisa-form').submit();
+                    };
+                    sug.appendChild(item);
+                });
+                sug.classList.remove('d-none');
+            });
+    }, 300));
+
+    document.addEventListener('click', function(e) {
+        if (!sug.contains(e.target) && e.target !== inp) {
+            sug.classList.add('d-none');
+        }
+    });
 });
 </script>
 {% endblock %}

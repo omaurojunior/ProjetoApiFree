@@ -11,17 +11,27 @@
                 <div class="col-sm-6">
                     <p class="mb-1"><strong>🏟️ Estádio:</strong> {{ team.venue }}</p>
                     <p class="mb-1"><strong>📅 Fundação:</strong> {{ team.founded }}</p>
-                    <p class="mb-1"><strong>🎨 Cores:</strong> {{ team.clubColors }}</p>
+                    <p class="mb-1"><strong>� País/Área:</strong> {{ team.area.name if team.area }}</p>
+                    <p class="mb-1"><strong>�🎨 Cores:</strong> {{ team.clubColors }}</p>
                 </div>
                 <div class="col-sm-6">
                     <p class="mb-1"><strong>🌐 Site:</strong> <a href="{{ team.website }}" target="_blank">{{ team.website }}</a></p>
-                    <p class="mb-1"><strong>📍 Endereço:</strong> {{ team.address }}</p>
+                    <p class="mb-1"><strong>� Telefone:</strong> {{ team.phone or '—' }}</p>
+                    <p class="mb-1"><strong>✉️ Email:</strong> {{ team.email or '—' }}</p>
+                    <p class="mb-1"><strong>�📍 Endereço:</strong> {{ team.address }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
+        <div class="col-12 mb-4">
+            <!-- extra quick facts line -->
+            <p class="small text-muted">
+                ID: {{ team.id }} • SIGLA: {{ team.tla or '–' }} • Nome curto: {{ team.shortName or '–' }}
+                {% if team.lastUpdated %}• Atualizado: {{ team.lastUpdated }}{% endif %}
+            </p>
+        </div>
         <div class="col-md-4 mb-4">
             <h4 class="fw-bold mb-3">🏆 Competições Atuais</h4>
             {% for c in competitions %}

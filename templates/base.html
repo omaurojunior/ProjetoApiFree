@@ -72,27 +72,21 @@
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
 
-        // Função para atualizar o texto do botão
+        // atualizar texto do botão
         const updateButtonText = (isDark) => {
             themeToggle.innerText = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
         };
 
-        // Carregar tema salvo no localStorage
+        // inicializar usando utilitário
         if (localStorage.getItem('theme') === 'dark') {
             body.setAttribute('data-theme', 'dark');
             updateButtonText(true);
         }
 
         themeToggle.addEventListener('click', () => {
-            if (body.hasAttribute('data-theme')) {
-                body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-                updateButtonText(false);
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                updateButtonText(true);
-            }
+            Utils.toggleDarkMode();
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            updateButtonText(isDark);
         });
     </script>
 </body>

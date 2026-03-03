@@ -8,12 +8,16 @@
 
     <div class="row">
         <div class="col-lg-5 mb-4">
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100 shadow-sm border-0 animate-card">
                 <div class="card-body">
-                    <h5 class="card-title">🏠 Time 1</h5>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="time1-input" placeholder="Digite ID ou nome do time...">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">🏠 Time 1</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearTeam('time1')">✖️</button>
+                    </div>
+                    <div class="input-group mb-3 position-relative">
+                        <input type="text" class="form-control" id="time1-input" placeholder="Digite ID ou nome do time..." autocomplete="off">
                         <button class="btn btn-success" onclick="buscarTime1()">Buscar</button>
+                        <ul id="time1-suggestions" class="list-group position-absolute w-100 mt-1 d-none" style="z-index:1000;"></ul>
                     </div>
                     
                     <div id="time1-info" class="d-none">
@@ -56,12 +60,16 @@
         </div>
 
         <div class="col-lg-5 mb-4">
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100 shadow-sm border-0 animate-card">
                 <div class="card-body">
-                    <h5 class="card-title">🏠 Time 2</h5>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="time2-input" placeholder="Digite ID ou nome do time...">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">🏠 Time 2</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearTeam('time2')">✖️</button>
+                    </div>
+                    <div class="input-group mb-3 position-relative">
+                        <input type="text" class="form-control" id="time2-input" placeholder="Digite ID ou nome do time..." autocomplete="off">
                         <button class="btn btn-success" onclick="buscarTime2()">Buscar</button>
+                        <ul id="time2-suggestions" class="list-group position-absolute w-100 mt-1 d-none" style="z-index:1000;"></ul>
                     </div>
                     
                     <div id="time2-info" class="d-none">
@@ -171,6 +179,56 @@ function ocultarSkeleton(prefixo) {
     document.getElementById(`${prefixo}-info`).classList.remove('d-none');
 }
 
+function renderSuggestions(prefixo, teams) {
+    const list = document.getElementById(`${prefixo}-suggestions`);
+    list.innerHTML = '';
+    if (!teams.length) {
+        list.classList.add('d-none');
+        return;
+    }
+    teams.forEach(t => {
+        const item = document.createElement('li');
+        item.className = 'list-group-item list-group-item-action';
+        item.textContent = t.name;
+        item.onclick = () => selectTeam(prefixo, t);
+        list.appendChild(item);
+    });
+    list.classList.remove('d-none');
+}
+
+function selectTeam(prefixo, team) {
+    document.getElementById(`${prefixo}-input`).value = team.name;
+    document.getElementById(`${prefixo}-suggestions`).classList.add('d-none');
+    mostrarSkeleton(prefixo);
+
+    fetch(`/api/team/${team.id}`)
+        .then(r => r.json())
+        .then(t => {
+            if (t.erro) {
+                Utils.showToast(t.erro, 'danger');
+            } else {
+                setTeamData(prefixo, t);
+            }
+            ocultarSkeleton(prefixo);
+        })
+        .catch(e => {
+            console.error(e);
+            Utils.showToast('Erro ao carregar dados do time', 'danger');
+            ocultarSkeleton(prefixo);
+        });
+}
+
+function setTeamData(prefixo, t) {
+    if (prefixo === 'time1') time1Data = t;
+    else time2Data = t;
+
+    document.getElementById(`${prefixo}-escudo`).src = t.crest || '';
+    document.getElementById(`${prefixo}-nome`).textContent = t.name;
+    document.getElementById(`${prefixo}-fundacao`).textContent = t.founded || '—';
+    document.getElementById(`${prefixo}-estadio`).textContent = t.venue || '—';
+    document.getElementById(`${prefixo}-jogadores`).textContent = (t.squad || []).length;
+}
+
 function buscarTime1() {
     buscarTime('time1');
 }
@@ -182,71 +240,122 @@ function buscarTime2() {
 function buscarTime(prefixo) {
     const input = document.getElementById(`${prefixo}-input`);
     const query = input.value.trim();
-    
     if (!query) {
-        showNotification('Digite um ID ou nome do time', 'warning');
+        Utils.showToast('Digite um ID ou nome do time', 'warning');
         return;
     }
-
-    mostrarSkeleton(prefixo);
-    
-    // Simular busca (em produção, chamar API real)
-    setTimeout(() => {
-        fetch(`/pesquisa`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `nome_time=${encodeURIComponent(query)}`
-        })
-        .then(r => r.text())
-        .then(html => {
-            // Extrair primeiro resultado
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const card = doc.querySelector('[onclick*="time"]');
-            
-            if (card) {
-                const nome = card.querySelector('h4').textContent;
-                const escudo = card.querySelector('img').src;
-                // Em produção buscar dados reais da API
-                showNotification('Time não encontrado. Use a página de Pesquisa para encontrar times.', 'info');
-            } else {
-                showNotification('Time não encontrado', 'warning');
-            }
-            ocultarSkeleton(prefixo);
+    // se for número, buscar direto pelo ID
+    if (/^\d+$/.test(query)) {
+        selectTeam(prefixo, {id: parseInt(query), name: ''});
+        return;
+    }
+    // chamar API de pesquisa
+    Utils.showSkeleton(`#${prefixo}-info`);
+    fetch(`/api/teams?q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(list => {
+            renderSuggestions(prefixo, list);
         })
         .catch(e => {
             console.error(e);
-            ocultarSkeleton(prefixo);
+            Utils.showToast('Erro ao pesquisar times', 'danger');
         });
-    }, 800);
 }
+
+// Debounce helper para o input
+const debouncedSearch = Utils.debounce((prefixo, value) => {
+    document.getElementById(`${prefixo}-input`).value = value;
+    buscarTime(prefixo);
+}, 300);
+
+// ligar evento de input
+['time1','time2'].forEach(p => {
+    const inp = document.getElementById(`${p}-input`);
+    inp.addEventListener('input', (e) => {
+        debouncedSearch(p, e.target.value);
+    });
+});
+
+// fechar lista de sugestões ao clicar fora
+document.addEventListener('click', (e) => {
+    ['time1','time2'].forEach(p => {
+        const sug = document.getElementById(`${p}-suggestions`);
+        const inp = document.getElementById(`${p}-input`);
+        if (sug && !sug.contains(e.target) && e.target !== inp) {
+            sug.classList.add('d-none');
+        }
+    });
+});
 
 function compararTimes() {
     if (!time1Data || !time2Data) {
-        showNotification('Selecione dois times para comparar', 'warning');
+        Utils.showToast('Selecione dois times para comparar', 'warning');
         return;
     }
 
-    // Aqui teríamos a lógica de comparação
-    showNotification('Comparação iniciada!', 'success');
+    fetch('/api/comparar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            team1_id: time1Data.id,
+            team2_id: time2Data.id
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.erro) {
+            Utils.showToast(data.erro, 'danger');
+            return;
+        }
+        showComparisonResult(data);
+    })
+    .catch(e => {
+        console.error(e);
+        Utils.showToast('Erro ao comparar times', 'danger');
+    });
 }
 
-function showNotification(mensagem, tipo = 'info') {
-    const toast = document.createElement('div');
-    toast.classList.add('toast', 'show', `bg-${tipo}`);
-    toast.innerHTML = `
-        <div class="toast-body text-white">
-            ${mensagem}
-        </div>
-    `;
-    
-    document.body.appendChild(toast);
-    toast.style.position = 'fixed';
-    toast.style.top = '20px';
-    toast.style.right = '20px';
-    toast.style.zIndex = '9999';
-    
-    setTimeout(() => toast.remove(), 3000);
+function showComparisonResult(data) {
+    document.getElementById('comparacao-resultado').classList.remove('d-none');
+    const t1 = data.time1;
+    const t2 = data.time2;
+    document.getElementById('comp1-escudo').src = t1.escudo || '';
+    document.getElementById('comp1-nome').textContent = t1.nome;
+    document.getElementById('comp1-info').textContent =
+        `Fundado: ${t1.fundacao || '—'} • ${t1.jogadores} jogadores`;
+    document.getElementById('comp2-escudo').src = t2.escudo || '';
+    document.getElementById('comp2-nome').textContent = t2.nome;
+    document.getElementById('comp2-info').textContent =
+        `Fundado: ${t2.fundacao || '—'} • ${t2.jogadores} jogadores`;
+
+    // destaque de superioridade simples
+    const comp1Elem = document.getElementById('comp-time1');
+    const comp2Elem = document.getElementById('comp-time2');
+    comp1Elem.classList.remove('border-success','border-danger');
+    comp2Elem.classList.remove('border-success','border-danger');
+    if (t1.fundacao && t2.fundacao) {
+        if (t1.fundacao < t2.fundacao) comp1Elem.classList.add('border-success');
+        else if (t2.fundacao < t1.fundacao) comp2Elem.classList.add('border-success');
+    }
+    if (t1.jogadores && t2.jogadores) {
+        if (t1.jogadores > t2.jogadores) comp1Elem.classList.add('border-success');
+        else if (t2.jogadores > t1.jogadores) comp2Elem.classList.add('border-success');
+    }
+
+    document.getElementById('comp-messagem').textContent =
+        `Comparação gerada em ${new Date().toLocaleString()}`;
+
+    // efeito flip rápido
+    document.getElementById('comp-time1').classList.add('flip-card');
+    document.getElementById('comp-time2').classList.add('flip-card');
+}
+
+function clearTeam(prefixo) {
+    if (prefixo === 'time1') time1Data = null;
+    if (prefixo === 'time2') time2Data = null;
+    document.getElementById(`${prefixo}-input`).value = '';
+    document.getElementById(`${prefixo}-info`).classList.add('d-none');
+    document.getElementById('comparacao-resultado').classList.add('d-none');
 }
 </script>
 {% endblock %}

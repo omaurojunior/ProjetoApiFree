@@ -201,34 +201,42 @@ def format_date(value):
 def pesquisa():
     teams = []
     query = ""
+
+    # aceitar também GET para facilitar sugestões via JS
     if request.method == 'POST':
         query = request.form.get('nome_time', '').strip()
-        
-        # Validar entrada
+    else:
+        query = request.args.get('nome_time', '').strip()
+
+    if query:
+        # validações
         if len(query) < 2:
             flash("❌ Digite no mínimo 2 caracteres", "warning")
             return render_template('pesquisa.html', teams=[], query=query)
-        
         if len(query) > 50:
             flash("❌ Máximo 50 caracteres", "warning")
             return render_template('pesquisa.html', teams=[], query=query)
-            
+
         query_lower = query.lower()
-        
         for lid in SUPPORTED_LEAGUES.keys():
             data = get_api_data(f"competitions/{lid}/teams")
             if data and 'teams' in data:
-                found = [t for t in data['teams'] 
-                        if query_lower in t.get('name', '').lower() 
+                found = [t for t in data['teams']
+                        if query_lower in t.get('name', '').lower()
                         or query_lower in t.get('shortName', '').lower()]
                 teams.extend(found)
-        
-        # Remove duplicatas mantendo tipo dict
+
         teams = list({v['id']: v for v in teams}.values())
-        
         if not teams:
             flash(f"ℹ️ Nenhum time encontrado para '{query}'", "info")
-        
+    else:
+        # sem query lista todos os times para navegação
+        for lid in SUPPORTED_LEAGUES.keys():
+            data = get_api_data(f"competitions/{lid}/teams")
+            if data and 'teams' in data:
+                teams.extend(data['teams'])
+        teams = list({v['id']: v for v in teams}.values())
+
     return render_template('pesquisa.html', teams=teams, query=query)
 
 @app.route('/time/<int:team_id>')
@@ -285,7 +293,12 @@ def api_favoritos():
 # @limiter.limit("30 per minute")
 @handle_api_error
 def api_comparar():
-    """Compara estatísticas entre dois times."""
+    """Compara estatísticas entre dois times.
+
+    Retorna um JSON com informações básicas e adicionais sobre cada
+    equipe. Caso a API retorne menos campos, usamos defaults para evitar
+    quebra na interface front-end.
+    """
     data = request.get_json()
     team1_id = data.get('team1_id')
     team2_id = data.get('team2_id')
@@ -299,27 +312,77 @@ def api_comparar():
     if not team1 or not team2:
         return jsonify({'erro': 'Time(s) não encontrado(s)'}), 404
     
-    comparacao = {
-        'time1': {
-            'id': team1.get('id'),
-            'nome': team1.get('name'),
-            'escudo': team1.get('crest'),
-            'fundacao': team1.get('founded'),
-            'jogadores': len(team1.get('squad', [])),
-            'estadio': team1.get('venue')
-        },
-        'time2': {
-            'id': team2.get('id'),
-            'nome': team2.get('name'),
-            'escudo': team2.get('crest'),
-            'fundacao': team2.get('founded'),
-            'jogadores': len(team2.get('squad', [])),
-            'estadio': team2.get('venue')
+    def summarize(team):
+        return {
+            'id': team.get('id'),
+            'nome': team.get('name'),
+            'escudo': team.get('crest'),
+            'fundacao': team.get('founded'),
+            'jogadores': len(team.get('squad', [])),
+            'estadio': team.get('venue'),
+            'tla': team.get('tla'),
+            'shortName': team.get('shortName'),
+            'phone': team.get('phone'),
+            'email': team.get('email'),
+            'endereco': team.get('address'),
+            'website': team.get('website')
         }
+    
+    comparacao = {
+        'time1': summarize(team1),
+        'time2': summarize(team2)
     }
     
     logger.info(f"📊 Comparação: {team1_id} vs {team2_id}")
     return jsonify(comparacao)
+
+
+@app.route('/api/teams', methods=['GET'])
+@cache.cached(timeout=600, query_string=True)
+@handle_api_error
+def api_teams():
+    """Busca times pelo nome (case‑insensitive) em todas as ligas suportadas.
+
+    Usa o mesmo cache do Flask-Caching para não sobrecarregar a API externa.
+    """
+    q = request.args.get('q', '').strip().lower()
+    if not q:
+        return jsonify([])
+
+    results = []
+    for lid in SUPPORTED_LEAGUES.keys():
+        data = get_api_data(f"competitions/{lid}/teams")
+        if data and 'teams' in data:
+            for t in data['teams']:
+                name = t.get('name', '').lower()
+                short = t.get('shortName', '').lower()
+                if q in name or q in short:
+                    results.append({
+                        'id': t.get('id'),
+                        'name': t.get('name'),
+                        'shortName': t.get('shortName'),
+                        'crest': t.get('crest'),
+                    })
+    # remover duplicatas por id
+    seen = set()
+    unique = []
+    for t in results:
+        if t['id'] not in seen:
+            seen.add(t['id'])
+            unique.append(t)
+    return jsonify(unique)
+
+
+@app.route('/api/team/<int:team_id>', methods=['GET'])
+@cache.cached(timeout=3600)
+@handle_api_error
+def api_team(team_id):
+    """Retorna os dados brutos de um time em JSON."""
+    data = get_api_data(f"teams/{team_id}")
+    if not data:
+        return jsonify({'erro': 'Time não encontrado'}), 404
+    return jsonify(data)
+
 
 @app.route('/api/ranking', methods=['GET'])
 @cache.cached(timeout=1800)
